@@ -64,4 +64,3 @@ admin.site.register(Message, MessageAdmin)
 admin.site.register(Video, VideoAdmin)
 admin.site.register(CodeRepository, CodeRepositoryAdmin)
 admin.site.register(CodeCommit, CodeCommitAdmin)
-

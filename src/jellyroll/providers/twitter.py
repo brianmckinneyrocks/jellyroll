@@ -21,6 +21,74 @@ from jellyroll.models import Item, Message, ContentLink
 RECENT_STATUSES_URL = "http://twitter.com/statuses/user_timeline/%s.rss"
 USER_URL = "http://twitter.com/%s"
 
+def get_history():
+     TWITTER_URL =  "http://api.twitter.com/1/statuses/user_timeline.rss?page=%s&count=200&screen_name=brianmckinney"
+     log = logging.getLogger("jellyroll.providers.twitter")
+
+     done = False
+     page = 1
+     log.debug("Fetching Twitter Status")
+     #username = settings.TWITTER_USERNAME
+     #password = settings.TWITTER_PASSWORD
+
+     while not done:
+        log.debug("Page " + str(page))
+        #resp = utils.getjson(TWITTER_URL %page)
+           #f resp.has_key('error') and resp['error']['status_code'] == 404:
+         #   log.debug("Ran out of results; finishing.")
+           #   break
+        json = utils.getjson(TWITTER_URL % page)
+        if json.has_key('error'):
+             log.warn("Out of status results. Stopping.")
+             done = True
+             break
+        for status in json:
+            if 'error' in status:
+                log.debug("Ran out of results; finishing.")
+                break
+            message      = status['title']
+            message_text = smart_unicode(message)
+            url          = smart_unicode(status['link'])
+
+            # pubDate delivered as UTC
+            timestamp    = dateutil.parser.parse(status['pubDate'])
+            if utils.JELLYROLL_ADJUST_DATETIME:
+               timestamp = utils.utc_to_local_datetime(timestamp)
+
+            if not _status_exists(message_text, url, timestamp):
+               _handle_status(message_text, url, timestamp)
+ 
+
+      #  for status in resp:
+      #      if 'error' in status:
+      #          log.debug(status)
+      #          done = True
+      #          break
+#     #       import pdb; pdb.set_trace()
+#            message      = status['title']
+      #      message_text = smart_unicode(status['text'])
+      #      url          = smart_unicode(status['link'].text)
+
+            # pubDate delivered as UTC
+      #      timestamp    = dateutil.parser.parse(status['pubDate'].text)
+      #      if utils.JELLYROLL_ADJUST_DATETIME:
+      #          timestamp = utils.utc_to_local_datetime(timestamp)
+
+       #     if not _status_exists(message_text, url, timestamp):
+       #         _handle_status(message_text, url, timestamp)
+
+        page += 1
+
+     #       _handle_status(
+     #           id = status['id'],
+     #           timestamp = utils.parsedate(status['created_at']), #+ time_difference,
+     #           #datetime.datetime.fromtimestamp(status['created_at']),
+     #           message = status['text']
+     #       )
+
+
+
+
 #
 # Public API
 #
