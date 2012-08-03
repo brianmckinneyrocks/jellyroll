@@ -1,6 +1,6 @@
 import django.forms
 from django.contrib import admin
-from jellyroll.models import Item, Bookmark, Track, Photo, WebSearch, Message
+from jellyroll.models import Item, Location, Bookmark, Track, Photo, WebSearch, Message
 from jellyroll.models import WebSearchResult, Video, CodeRepository, CodeCommit
 
 class ItemAdmin(admin.ModelAdmin):
@@ -9,9 +9,12 @@ class ItemAdmin(admin.ModelAdmin):
     list_filter = ('content_type', 'timestamp')
     search_fields = ('object_str', 'tags')
 
+class LocationAdmin(admin.ModelAdmin):
+    pass
+
 class BookmarkAdmin(admin.ModelAdmin):
-    list_display = ('url', 'description')
-    search_fields = ('url', 'description', 'thumbnail')
+   list_display = ('url', 'description')
+   search_fields = ('url', 'description', 'thumbnail')
     
 class TrackAdmin(admin.ModelAdmin):
     list_display = ('track_name', 'artist_name')
@@ -56,6 +59,7 @@ class CodeCommitAdmin(admin.ModelAdmin):
     search_fields = ('message',)
 
 admin.site.register(Item, ItemAdmin)
+admin.site.register(Location, LocationAdmin)
 admin.site.register(Bookmark, BookmarkAdmin)
 admin.site.register(Track, TrackAdmin)
 admin.site.register(Photo, PhotoAdmin)

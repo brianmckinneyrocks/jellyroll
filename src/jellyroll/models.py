@@ -362,8 +362,8 @@ class Location(models.Model):
     """
     Where you are at a given moment in time.
     """
-    latitude = models.DecimalField(max_digits=10, decimal_places=6)
-    longitude = models.DecimalField(max_digits=10, decimal_places=6)
+    latitude = models.TextField()
+    longitude = models.TextField()
     name = models.CharField(max_length=200, blank=True)
     
     def __unicode__(self):
@@ -375,6 +375,23 @@ class Location(models.Model):
     @property
     def url(self):
         return "http://maps.google.com/maps?q=%s,%s" % (self.longitude, self.latitude)
+
+### Remove me
+
+#class Status(models.Model):
+#  """
+#  A Status is a brief update on what someone's doing, a la Twitter.
+#  """
+#  body                      = models.TextField()
+#  date_published            = models.DateTimeField()
+
+#  class Meta:
+#    verbose_name_plural     = "Statuses"
+#    ordering                = ['-date_published']
+
+#  def __unicode__(self):
+#    return self.body
+        
         
 # Register item objects to be "followed"
 Item.objects.follow_model(Bookmark)

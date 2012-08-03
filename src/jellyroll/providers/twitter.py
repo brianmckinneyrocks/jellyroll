@@ -18,74 +18,41 @@ from jellyroll.models import Item, Message, ContentLink
 # API URLs
 #
 
-RECENT_STATUSES_URL = "http://twitter.com/statuses/user_timeline/%s.rss"
+RECENT_STATUSES_URL = "http://twitter.com/statuses/user_timeline.json?screen_name=%s"
 USER_URL = "http://twitter.com/%s"
+TWITTER_LINK_TEMPLATE = 'http://twitter.com/brianmckinney/statuses/%s'
 
 def get_history():
-     TWITTER_URL =  "http://api.twitter.com/1/statuses/user_timeline.rss?page=%s&count=200&screen_name=brianmckinney"
+     TWITTER_URL =  "http://api.twitter.com/1/statuses/user_timeline.json?page=%s&count=200&screen_name=brianmckinney&include_rts=true"
      log = logging.getLogger("jellyroll.providers.twitter")
 
      done = False
-     page = 1
+     page = 0 
      log.debug("Fetching Twitter Status")
-     #username = settings.TWITTER_USERNAME
-     #password = settings.TWITTER_PASSWORD
 
      while not done:
         log.debug("Page " + str(page))
-        #resp = utils.getjson(TWITTER_URL %page)
-           #f resp.has_key('error') and resp['error']['status_code'] == 404:
-         #   log.debug("Ran out of results; finishing.")
-           #   break
         json = utils.getjson(TWITTER_URL % page)
-        if json.has_key('error'):
-             log.warn("Out of status results. Stopping.")
-             done = True
-             break
+
+        if len(json) == 0:
+            log.debug("Error: ran out of results exiting")
+            break
+
         for status in json:
-            if 'error' in status:
-                log.debug("Ran out of results; finishing.")
-                break
-            message      = status['title']
+            message      = status['text']
             message_text = smart_unicode(message)
-            url          = smart_unicode(status['link'])
+            url          = smart_unicode(TWITTER_LINK_TEMPLATE % status['id'])
+            id           = status['id']
 
             # pubDate delivered as UTC
-            timestamp    = dateutil.parser.parse(status['pubDate'])
+            timestamp    = dateutil.parser.parse(status['created_at'])
             if utils.JELLYROLL_ADJUST_DATETIME:
                timestamp = utils.utc_to_local_datetime(timestamp)
 
-            if not _status_exists(message_text, url, timestamp):
-               _handle_status(message_text, url, timestamp)
- 
-
-      #  for status in resp:
-      #      if 'error' in status:
-      #          log.debug(status)
-      #          done = True
-      #          break
-#     #       import pdb; pdb.set_trace()
-#            message      = status['title']
-      #      message_text = smart_unicode(status['text'])
-      #      url          = smart_unicode(status['link'].text)
-
-            # pubDate delivered as UTC
-      #      timestamp    = dateutil.parser.parse(status['pubDate'].text)
-      #      if utils.JELLYROLL_ADJUST_DATETIME:
-      #          timestamp = utils.utc_to_local_datetime(timestamp)
-
-       #     if not _status_exists(message_text, url, timestamp):
-       #         _handle_status(message_text, url, timestamp)
-
+            if not _status_exists(id):
+               _handle_status(id, message_text, url, timestamp)
+               
         page += 1
-
-     #       _handle_status(
-     #           id = status['id'],
-     #           timestamp = utils.parsedate(status['created_at']), #+ time_difference,
-     #           #datetime.datetime.fromtimestamp(status['created_at']),
-     #           message = status['text']
-     #       )
-
 
 
 
@@ -102,19 +69,20 @@ def update():
     last_update_date = Item.objects.get_last_update_of_model(Message)
     log.debug("Last update date: %s", last_update_date)
     
-    xml = utils.getxml(RECENT_STATUSES_URL % settings.TWITTER_USERNAME)
-    for status in xml.getiterator("item"):
-        message      = status.find('title')
-        message_text = smart_unicode(message.text)
-        url          = smart_unicode(status.find('link').text)
+    json = utils.getjson(RECENT_STATUSES_URL % settings.TWITTER_USERNAME)
+    for status in json:
+        message      = status['text']
+        message_text = smart_unicode(message)
+        url          = smart_unicode(TWITTER_LINK_TEMPLATE % status['id_string'])
+        id           = status['id']
 
         # pubDate delivered as UTC
-        timestamp    = dateutil.parser.parse(status.find('pubDate').text)
+        timestamp    = dateutil.parser.parse(status['created_at'])
         if utils.JELLYROLL_ADJUST_DATETIME:
             timestamp = utils.utc_to_local_datetime(timestamp)
 
-        if not _status_exists(message_text, url, timestamp):
-            _handle_status(message_text, url, timestamp)
+        if not _status_exists(id):
+            _handle_status(id, message_text, url, timestamp)
 
 #
 # GLOBAL CLUTTER
@@ -199,20 +167,20 @@ else:
 #
 
 @transaction.commit_on_success
-def _handle_status(message_text, url, timestamp):
+def _handle_status(id, message_text, url, timestamp):
     message_text, links, tags = _parse_message(message_text)
 
     t = Message(
         message = message_text,
         )
 
-    if not _status_exists(message_text, url, timestamp):
+    if not _status_exists(id):
         log.debug("Saving message: %r", message_text)
         item = Item.objects.create_or_update(
             instance = t,
             timestamp = timestamp,
             source = __name__,
-            source_id = _source_id(message_text, url, timestamp),
+            source_id = id,
             url = url,
             tags = tags,
             )
@@ -226,11 +194,11 @@ def _handle_status(message_text, url, timestamp):
             l.save()
             t.links.add(l)
 
-def _source_id(message_text, url, timestamp):
-    return hashlib.md5(smart_str(message_text) + smart_str(url) + str(timestamp)).hexdigest()
+#def _source_id(message_text, url, timestamp):
+#    return hashlib.md5(smart_str(message_text) + smart_str(url) + str(timestamp)).hexdigest()
     
-def _status_exists(message_text, url, timestamp):
-    id = _source_id(message_text, url, timestamp)
+def _status_exists(id):
+    #_source_id(message_text, url, timestamp)
     try:
         Item.objects.get(source=__name__, source_id=id)
     except Item.DoesNotExist:
