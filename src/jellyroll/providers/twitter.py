@@ -27,7 +27,7 @@ def get_history():
      log = logging.getLogger("jellyroll.providers.twitter")
 
      done = False
-     page = 0 
+     page = 1 
      log.debug("Fetching Twitter Status")
 
      while not done:

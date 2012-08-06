@@ -9,7 +9,7 @@ from jellyroll.providers.twitter import _parse_message
 class Migration(DataMigration):
     def forwards(self, orm):
         "Write your forwards methods here."
-        for s in orm.Status.objects.all():
+        for s in orm.Status.objects.all().order_by('date_published'):
             existing_item = Item.objects.get(content_type=37, object_id=s.id)
             if int(existing_item.source_id) < 1046567017:
                 message_text, links, tags = _parse_message(s.body)
