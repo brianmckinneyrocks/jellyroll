@@ -94,8 +94,8 @@ class JellyrenderNode(template.Node):
                 
         # Figure out which templates to use
         template_list = [
-            "jellyroll/snippets/%s.html" % type(object).__name__.lower(), 
-            "jellyroll/snippets/item.html"
+            "includes/defaults/%s.%s.html" % (type(object)._meta.app_label, type(object)._meta.module_name),
+            "includes/defaults/default.html"
         ]
         if self.using:
             try:

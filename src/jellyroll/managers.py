@@ -37,6 +37,8 @@ class ItemManager(models.Manager):
         # the timestamp from the instance.
         if hasattr(instance, "timestamp"):
             timestamp = instance.timestamp
+        if hasattr(instance, "created"):
+            timestamp = instance.created
         if timestamp is None:
             update_timestamp = False
             timestamp = datetime.datetime.now()
@@ -53,6 +55,9 @@ class ItemManager(models.Manager):
         if not url:
             if hasattr(instance,'url'):
                 url = instance.url
+            else:
+                from django.contrib.sites.models import Site
+                url = 'http://' + Site.objects.get_current().domain + instance.get_absolute_url()
 
         # Create the Item object.
         ctype = ContentType.objects.get_for_model(instance)
