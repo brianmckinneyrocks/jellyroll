@@ -93,12 +93,29 @@ def _handle_photo(flickr, photo_id, secret, license, timestamp):
     info = flickr.photos.getInfo(photo_id=photo_id, secret=secret)["photo"]
     server_id = utils.safeint(info["server"])
     farm_id = utils.safeint(info["farm"])
+    o_secret = utils.smart_unicode(info["originalsecret"])
     taken_by = smart_unicode(info["owner"]["username"])
     title = smart_unicode(info["title"]["_content"])
     description = smart_unicode(info["description"]["_content"])
     comment_count = utils.safeint(info["comments"]["_content"])
     date_uploaded = datetime.datetime.fromtimestamp(utils.safeint(info["dates"]["posted"]))
     date_updated = datetime.datetime.fromtimestamp(utils.safeint(info["dates"]["lastupdate"]))
+    
+    #Copy a remote version of the original file over to server
+    path = 'photos/flickr/%Y/%m/%d'
+    today = datetime.datetime.today()
+    desired_path = os.path.join(settings.MEDIA_ROOT, today.strftime(path))
+
+    if not os.path.exists(desired_path):
+        os.makedirs(desired_path)
+
+    original_url = "http://farm%s.staticflickr.com/%s/%s_%s_%s.jpg" % (farm_id, server_id, photo_id, o_secret, "o")
+    image_temp = urllib2.urlopen(original_url)
+    image = image_temp.read()
+    image_name = photo.original_url.split('/')[-1]
+    dest = open(os.path.join(desired_path, image_name), 'wb+')
+    dest.write(image)
+    local_image = os.path.join(today.strftime(path), image_name) 
     
     log.debug("Handling photo: %r (taken %s)" % (title, timestamp))
     photo, created = Photo.objects.get_or_create(
@@ -107,25 +124,30 @@ def _handle_photo(flickr, photo_id, secret, license, timestamp):
             server_id     = server_id,
             farm_id       = farm_id,
             secret        = secret,
+            o_secret      = o_secret,
             taken_by      = taken_by,
             cc_license    = license,
             title         = title,
             description   = description,
+            local_image   = local_image,
             comment_count = comment_count,
             date_uploaded = date_uploaded,
             date_updated  = date_updated,
         )
     )
+
     if created:
         photo.exif = _convert_exif(flickr.photos.getExif(photo_id=photo_id, secret=secret))
     else:
         photo.server_id     = server_id
         photo.farm_id       = farm_id
         photo.secret        = secret
+        photo.o_secret      = o_secret
         photo.taken_by      = taken_by
         photo.cc_license    = license
         photo.title         = title
         photo.description   = description
+        photo.local_image   = local_image
         photo.comment_count = comment_count
         photo.date_uploaded = date_uploaded
         photo.date_updated  = date_updated

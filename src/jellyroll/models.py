@@ -100,6 +100,7 @@ class Photo(models.Model):
     farm_id     = models.PositiveSmallIntegerField(null=True)
     server_id   = models.PositiveSmallIntegerField()
     secret      = models.CharField(max_length=30, blank=True)
+    o_secret    = models.CharField(max_length=30, blank=True)
 
     # Rights metadata
     taken_by    = models.CharField(max_length=100, blank=True)
@@ -109,6 +110,7 @@ class Photo(models.Model):
     title           = models.CharField(max_length=250)
     description     = models.TextField(blank=True)
     comment_count   = models.PositiveIntegerField(max_length=5, default=0)
+    local_image     = models.ImageField(upload_to="photos/flickr/%Y/%m/%d/", null=True, blank=True) 
     
     # Date metadata
     date_uploaded = models.DateTimeField(blank=True, null=True)
@@ -146,10 +148,14 @@ class Photo(models.Model):
     
     def get_image_url(self, size=None):
         if size in list('mstbo'):
-            return "http://%sstatic.flickr.com/%s/%s_%s_%s.jpg" % \
-                (self.farm, self.server_id, self.photo_id, self.secret, size)
+            if size == 'o':
+                return "http://%sstaticflickr.com/%s/%s_%s_%s.jpg" % \
+                    (self.farm, self.server_id, self.photo_id, self.o_secret, size) 
+            else:
+                return "http://%sstaticflickr.com/%s/%s_%s_%s.jpg" % \
+                    (self.farm, self.server_id, self.photo_id, self.secret, size)
         else:
-            return "http://%sstatic.flickr.com/%s/%s_%s.jpg" % \
+            return "http://%sstaticflickr.com/%s/%s_%s.jpg" % \
                 (self.farm, self.server_id, self.photo_id, self.secret)
     
     image_url       = property(lambda self: self.get_image_url())
