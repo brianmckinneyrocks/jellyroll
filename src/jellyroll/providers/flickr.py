@@ -1,6 +1,8 @@
 import datetime
 import logging
 import urllib
+import urllib2
+import os
 from django.conf import settings
 from django.db import transaction
 from django.utils.encoding import smart_unicode
@@ -93,14 +95,15 @@ def _handle_photo(flickr, photo_id, secret, license, timestamp):
     info = flickr.photos.getInfo(photo_id=photo_id, secret=secret)["photo"]
     server_id = utils.safeint(info["server"])
     farm_id = utils.safeint(info["farm"])
-    o_secret = utils.smart_unicode(info["originalsecret"])
-    taken_by = smart_unicode(info["owner"]["username"])
+    o_secret = smart_unicode(info["originalsecret"])
+    taken_by = smart_unicode(info["owner"]["path_alias"])
     title = smart_unicode(info["title"]["_content"])
     description = smart_unicode(info["description"]["_content"])
     comment_count = utils.safeint(info["comments"]["_content"])
     date_uploaded = datetime.datetime.fromtimestamp(utils.safeint(info["dates"]["posted"]))
     date_updated = datetime.datetime.fromtimestamp(utils.safeint(info["dates"]["lastupdate"]))
     
+    #import pdb; pdb.set_trace()
     #Copy a remote version of the original file over to server
     path = 'photos/flickr/%Y/%m/%d'
     today = datetime.datetime.today()
@@ -112,7 +115,7 @@ def _handle_photo(flickr, photo_id, secret, license, timestamp):
     original_url = "http://farm%s.staticflickr.com/%s/%s_%s_%s.jpg" % (farm_id, server_id, photo_id, o_secret, "o")
     image_temp = urllib2.urlopen(original_url)
     image = image_temp.read()
-    image_name = photo.original_url.split('/')[-1]
+    image_name = original_url.split('/')[-1]
     dest = open(os.path.join(desired_path, image_name), 'wb+')
     dest.write(image)
     local_image = os.path.join(today.strftime(path), image_name) 
