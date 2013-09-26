@@ -25,7 +25,7 @@ class Command(BaseCommand):
         if not os.path.exists(desired_path):
             os.makedirs(desired_path)
 
-        photos = Photo.objects.all()
+        photos = Photo.objects.filter(local_image="")
 
         for photo in photos:
             image_temp = urllib2.urlopen(photo.original_url)

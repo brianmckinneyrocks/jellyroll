@@ -21,7 +21,7 @@ class TrackAdmin(admin.ModelAdmin):
     search_fields = ('artist_name', 'track_name')
 
 class PhotoAdmin(admin.ModelAdmin):
-    list_display = ('title', 'photo_id','description', 'taken_by')
+    list_display = ('title', 'photo_id','description', 'local_image', 'taken_by')
     search_fields = ('title', 'description', 'taken_by')
 
 class WebSearchResultInline(admin.TabularInline):

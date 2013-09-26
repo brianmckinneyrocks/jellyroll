@@ -6,6 +6,7 @@ import os
 from django.conf import settings
 from django.db import transaction
 from django.utils.encoding import smart_unicode
+from django.core.files import File
 from jellyroll.models import Item, Photo
 from jellyroll.providers import utils
 
@@ -85,7 +86,10 @@ def update():
             secret = smart_unicode(photodict["secret"])
             _handle_photo(flickr, photo_id, secret, license, timestamp)
             
-        page += 1
+        page += 1 
+
+    _get_flickr_photos()   
+
         
 #
 # Private API
@@ -97,28 +101,14 @@ def _handle_photo(flickr, photo_id, secret, license, timestamp):
     farm_id = utils.safeint(info["farm"])
     o_secret = smart_unicode(info["originalsecret"])
     taken_by = smart_unicode(info["owner"]["path_alias"])
-    title = smart_unicode(info["title"]["_content"])
+    if info["title"]["_content"]:
+        title = smart_unicode(info["title"]["_content"])
+    else: 
+        title = photo_id
     description = smart_unicode(info["description"]["_content"])
     comment_count = utils.safeint(info["comments"]["_content"])
     date_uploaded = datetime.datetime.fromtimestamp(utils.safeint(info["dates"]["posted"]))
     date_updated = datetime.datetime.fromtimestamp(utils.safeint(info["dates"]["lastupdate"]))
-    
-    #import pdb; pdb.set_trace()
-    #Copy a remote version of the original file over to server
-    path = 'photos/flickr/%Y/%m/%d'
-    today = datetime.datetime.today()
-    desired_path = os.path.join(settings.MEDIA_ROOT, today.strftime(path))
-
-    if not os.path.exists(desired_path):
-        os.makedirs(desired_path)
-
-    original_url = "http://farm%s.staticflickr.com/%s/%s_%s_%s.jpg" % (farm_id, server_id, photo_id, o_secret, "o")
-    image_temp = urllib2.urlopen(original_url)
-    image = image_temp.read()
-    image_name = original_url.split('/')[-1]
-    dest = open(os.path.join(desired_path, image_name), 'wb+')
-    dest.write(image)
-    local_image = os.path.join(today.strftime(path), image_name) 
     
     log.debug("Handling photo: %r (taken %s)" % (title, timestamp))
     photo, created = Photo.objects.get_or_create(
@@ -129,10 +119,8 @@ def _handle_photo(flickr, photo_id, secret, license, timestamp):
             secret        = secret,
             o_secret      = o_secret,
             taken_by      = taken_by,
-            cc_license    = license,
             title         = title,
             description   = description,
-            local_image   = local_image,
             comment_count = comment_count,
             date_uploaded = date_uploaded,
             date_updated  = date_updated,
@@ -150,7 +138,6 @@ def _handle_photo(flickr, photo_id, secret, license, timestamp):
         photo.cc_license    = license
         photo.title         = title
         photo.description   = description
-        photo.local_image   = local_image
         photo.comment_count = comment_count
         photo.date_uploaded = date_uploaded
         photo.date_updated  = date_updated
@@ -163,6 +150,32 @@ def _handle_photo(flickr, photo_id, secret, license, timestamp):
         source = __name__,
     )
 _handle_photo = transaction.commit_on_success(_handle_photo)
+
+def _get_flickr_photos():
+   path = 'photos/flickr/%Y/%m/%d'
+   today = datetime.datetime.today()
+   desired_path = os.path.join(settings.MEDIA_ROOT, today.strftime(path))
+
+   if not os.path.exists(desired_path):
+        os.makedirs(desired_path)
+
+   photos = Photo.objects.filter(local_image="")
+
+   for photo in photos:
+        image_temp = urllib2.urlopen(photo.original_url)
+        #image = image_temp.read()
+        image_name = photo.original_url.split('/')[-1]#Gets the last part of the url, the target image
+        image_ext = image_name.split(".")[-1]#Find the file extension
+        revised_image_name = "%s.%s" % (photo.photo_id, image_ext)
+        CHUNK = 16*1024
+        with open(os.path.join(desired_path, revised_image_name), 'wb+') as nfile:
+             while True: 
+                  chunk = image_temp.read(CHUNK)
+                  if not chunk: break
+                  nfile.write(chunk)  
+        photo.local_image = os.path.join(today.strftime(path), revised_image_name) 
+        photo.save()
+
 
 def _convert_exif(exif):
     converted = {}
