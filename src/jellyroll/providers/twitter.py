@@ -12,15 +12,20 @@ from django.utils.encoding import smart_str, smart_unicode
 from httplib2 import HttpLib2Error
 from jellyroll.providers import utils
 from jellyroll.models import Item, Message, ContentLink
+import tweepy
 
+# auth = tweepy.OAuthHandler(settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET)
+# auth.set_access_token(settings.TWITTER_ACCESS_TOKEN, settings.TWITTER_ACCESS_TOKEN_SECRET)
+# api = tweepy.API(auth)
+# print api.me().name
 
 #
 # API URLs
 #
 
-RECENT_STATUSES_URL = "http://twitter.com/statuses/user_timeline.json?screen_name=%s"
-USER_URL = "http://twitter.com/%s"
+
 TWITTER_LINK_TEMPLATE = 'http://twitter.com/brianmckinney/statuses/%s'
+USER_URL = "http://twitter.com/%s"
 
 def get_history():
      TWITTER_URL =  "http://api.twitter.com/1/statuses/user_timeline.json?page=%s&count=200&screen_name=brianmckinney&include_rts=true"
@@ -32,7 +37,10 @@ def get_history():
 
      while not done:
         log.debug("Page " + str(page))
-        json = utils.getjson(TWITTER_URL % page)
+        auth = tweepy.OAuthHandler(settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET)
+        auth.set_access_token(settings.TWITTER_ACCESS_TOKEN, settings.TWITTER_ACCESS_TOKEN_SECRET)
+        api = tweepy.API(auth)
+        #json = utils.getjson(TWITTER_URL % page)
 
         if len(json) == 0:
             log.debug("Error: ran out of results exiting")
@@ -69,15 +77,18 @@ def update():
     last_update_date = Item.objects.get_last_update_of_model(Message)
     log.debug("Last update date: %s", last_update_date)
     
-    json = utils.getjson(RECENT_STATUSES_URL % settings.TWITTER_USERNAME)
+    auth = tweepy.OAuthHandler(settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET)
+    auth.set_access_token(settings.TWITTER_ACCESS_TOKEN, settings.TWITTER_ACCESS_TOKEN_SECRET)
+    api = tweepy.API(auth)
+    json = api.user_timeline(count=100) 
     for status in json:
-        message      = status['text']
+        message      = status.text
         message_text = smart_unicode(message)
-        url          = smart_unicode(TWITTER_LINK_TEMPLATE % status['id_string'])
-        id           = status['id']
+        url          = smart_unicode(TWITTER_LINK_TEMPLATE % status.id_str)
+        id           = status.id
 
         # pubDate delivered as UTC
-        timestamp    = dateutil.parser.parse(status['created_at'])
+        timestamp    = dateutil.parser.parse(status.created_at.isoformat())
         if utils.JELLYROLL_ADJUST_DATETIME:
             timestamp = utils.utc_to_local_datetime(timestamp)
 
