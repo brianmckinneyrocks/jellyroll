@@ -69,14 +69,14 @@ def update():
     page = 1
     while True:
         log.debug("Fetching page %s of photos", page)
-        resp = flickr.people.getPublicPhotos(user_id=settings.FLICKR_USER_ID, extras="license,date_taken", per_page="500", page=str(page))
+        resp = flickr.people.getPublicPhotos(user_id=settings.FLICKR_USER_ID, extras="license,date_taken,date_upload", per_page="500", page=str(page))
         photos = resp["photos"]
         if page > photos["pages"]:
             log.debug("Ran out of photos; stopping.")
             break
             
         for photodict in photos["photo"]:
-            timestamp = utils.parsedate(str(photodict["datetaken"]))
+            timestamp = datetime.datetime.fromtimestamp(utils.safeint(photodict["dateupload"]))#utils.parsedate(str(photodict["dateupload"]))
             if timestamp < last_update_date:
                 log.debug("Hit an old photo (taken %s; last update was %s); stopping.", timestamp, last_update_date)
                 break
