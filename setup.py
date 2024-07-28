@@ -23,7 +23,7 @@ setup(
         'Django >= 1.1',
         'PILLOW',
         'python-dateutil',
-        'pytz == 2009e',
+        'pytz == 2024.1',
         'setuptools',
     ],
 
