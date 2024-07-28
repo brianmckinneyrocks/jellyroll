@@ -19,7 +19,8 @@ setup(
     package_dir = {'': 'src'},
     
     install_requires = [
-        'django-tagging >= 0.3.1, < 0.6',
+        # 'django-tagging >= 0.3.1, < 0.6',
+        'django-tagging==0.5.0',
         'Django >= 1.1',
         'PILLOW',
         'python-dateutil',
