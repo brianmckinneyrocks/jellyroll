@@ -1,5 +1,5 @@
 import urllib
-import urlparse
+from urllib.parse import urlparse
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
