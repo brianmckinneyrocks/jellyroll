@@ -7,7 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 from django.utils import text
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_str
 from jellyroll.managers import ItemManager
 from tagging.fields import TagField
 
@@ -48,7 +48,7 @@ class Item(models.Model):
     
     def save(self, *args, **kwargs):
         ct = "%s_%s" % (self.content_type.app_label, self.content_type.model.lower())
-        self.object_str = smart_unicode(self.object)
+        self.object_str = smart_str(self.object)
         super(Item, self).save(*args, **kwargs)
 
 class Bookmark(models.Model):
