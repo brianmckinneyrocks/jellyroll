@@ -2,7 +2,7 @@ import urllib
 from urllib.parse import urlparse
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 from django.utils import simplejson, text
 from django.utils.encoding import smart_unicode
@@ -17,7 +17,7 @@ class Item(models.Model):
     # Generic relation to the object.
     content_type = models.ForeignKey(ContentType)
     object_id = models.TextField()
-    object = generic.GenericForeignKey('content_type', 'object_id')
+    object = GenericForeignKey('content_type', 'object_id')
     
     # "Standard" metadata each object provides.
     url = models.URLField(blank=True, max_length=1000)
