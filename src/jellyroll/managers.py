@@ -21,7 +21,7 @@ class ItemManager(models.Manager):
         if instance._get_pk_val() is None:
             try:
                 signals.post_save.disconnect(self.create_or_update, sender=type(instance))
-            except Exception, err:
+            except (Exception, err):
                 reconnect = False
             else:
                 reconnect = True
