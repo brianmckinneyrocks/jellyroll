@@ -47,6 +47,7 @@ class CodeRepositoryAdmin(admin.ModelAdmin):
     class CodeRepositoryForm(django.forms.ModelForm):
         class Meta:
             model = CodeRepository
+            fields = ('type', 'name', 'slug', 'username', 'public_changeset_template', 'url')
             
         # Override the URL field to be more permissive
         url = django.forms.CharField(required=True, max_length=100)
