@@ -1,7 +1,11 @@
 import json
 import urllib
 
-from urllib.parse import urlparse
+# Remove after python 3
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
