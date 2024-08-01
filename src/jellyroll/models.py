@@ -8,7 +8,7 @@ except ImportError:
     from urlparse import urlparse
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.generic import GenericForeignKey
 from django.db import models
 from django.utils import text
 from django.utils.encoding import smart_str
