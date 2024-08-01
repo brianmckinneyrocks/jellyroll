@@ -20,7 +20,7 @@ setup(
     
     install_requires = [
         # 'django-tagging >= 0.3.1, < 0.6',
-        'django-tagging==0.5.0',
+        'django-tagging==0.3.2',
         'Django >= 1.1',
         'PILLOW',
         'python-dateutil',
