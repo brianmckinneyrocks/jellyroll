@@ -77,7 +77,7 @@ class JellyrenderNode(template.Node):
         
     def render(self, context):
         try:
-            item = template.resolve_variable(self.item, context)
+            item = template.Variable(self.item).resolve(context)
         except template.VariableDoesNotExist:
             return ""
                 
