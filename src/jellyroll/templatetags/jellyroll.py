@@ -95,7 +95,7 @@ class JellyrenderNode(template.Node):
                 
         # Figure out which templates to use
         template_list = [
-            "includes/defaults/%s.%s.html" % (type(object)._meta.app_label, type(object)._meta.model_name),
+            "includes/defaults/%s.%s.html" % (type(object)._meta.app_label, type(object)._meta.module_name),
             "includes/defaults/default.html"
         ]
         if self.using:
