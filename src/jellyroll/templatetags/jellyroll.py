@@ -2,7 +2,7 @@ import datetime
 import dateutil.parser
 import urllib
 from django import template
-#from django.apps import apps
+from django.apps import apps
 from django.db import models
 from django.template.loader import render_to_string
 from django.contrib.contenttypes.models import ContentType
@@ -14,7 +14,7 @@ except ImportError:
 
 
 # Hack until relative imports
-Item = models.get_model("jellyroll", "item")
+Item = apps.get_model("jellyroll", "item")
 
 register = template.Library()
 
