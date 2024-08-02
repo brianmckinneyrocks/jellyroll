@@ -10,7 +10,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.generic import GenericForeignKey
 from django.db import models
-from django.utils import text
+from django.utils.text import Truncator
 from django.utils.encoding import smart_str
 from jellyroll.managers import ItemManager
 from tagging.fields import TagField
@@ -350,7 +350,7 @@ class Message(models.Model):
     links = models.ManyToManyField('ContentLink',blank=True,null=True)
     
     def __unicode__(self):
-        return text.truncate_words(self.message, 30)
+        return Truncator(self.message).words(30)
 
 class ContentLink(models.Model):
     """
