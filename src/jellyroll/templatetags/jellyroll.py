@@ -112,8 +112,7 @@ class JellyrenderNode(template.Node):
             "item" : item,
             "object" : object
         })
-        #rendered = render_to_string(template_list, context.flatten())
-        rendered = render_to_string(template_list, context)
+        rendered = render_to_string(template_list, context.flatten())
         context.pop()
         if self.asvar:
             context[self.asvar] = rendered
