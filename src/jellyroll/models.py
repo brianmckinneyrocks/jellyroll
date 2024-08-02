@@ -115,7 +115,7 @@ class Photo(models.Model):
     # Main metadata
     title           = models.CharField(max_length=250)
     description     = models.TextField(blank=True)
-    comment_count   = models.PositiveIntegerField(max_length=5, default=0)
+    comment_count   = models.PositiveIntegerField(default=0)
     local_image     = models.ImageField(upload_to="photos/flickr/%Y/%m/%d/", null=True, blank=True) 
     
     # Date metadata
