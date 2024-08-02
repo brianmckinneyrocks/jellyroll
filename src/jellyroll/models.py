@@ -347,7 +347,7 @@ class Message(models.Model):
     A message, status update, or "tweet".
     """
     message = models.TextField()
-    links = models.ManyToManyField('ContentLink',blank=True,null=True)
+    links = models.ManyToManyField('ContentLink',blank=True)
     
     def __unicode__(self):
         return Truncator(self.message).words(30)
