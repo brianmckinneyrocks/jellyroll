@@ -76,7 +76,7 @@ class Migration(migrations.Migration):
                 ('source', models.CharField(max_length=100, blank=True)),
                 ('source_id', models.TextField(blank=True)),
                 ('object_str', models.TextField(blank=True)),
-                ('content_type', models.ForeignKey(to='contenttypes.ContentType')),
+                ('content_type', models.ForeignKey(to='contenttypes.ContentType', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['-timestamp'],
@@ -182,7 +182,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('query', models.CharField(max_length=250)),
-                ('engine', models.ForeignKey(related_name='searches', to='jellyroll.SearchEngine')),
+                ('engine', models.ForeignKey(related_name='searches', to='jellyroll.SearchEngine', on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name_plural': 'web searches',
@@ -195,7 +195,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('title', models.CharField(max_length=250)),
                 ('url', models.URLField()),
-                ('search', models.ForeignKey(related_name='results', to='jellyroll.WebSearch')),
+                ('search', models.ForeignKey(related_name='results', to='jellyroll.WebSearch',on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -204,7 +204,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='video',
             name='source',
-            field=models.ForeignKey(related_name='videos', to='jellyroll.VideoSource'),
+            field=models.ForeignKey(related_name='videos', to='jellyroll.VideoSource', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(
@@ -214,7 +214,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='codecommit',
             name='repository',
-            field=models.ForeignKey(related_name='commits', to='jellyroll.CodeRepository'),
+            field=models.ForeignKey(related_name='commits', to='jellyroll.CodeRepository', on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]
