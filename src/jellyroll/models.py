@@ -21,7 +21,7 @@ class Item(models.Model):
     """
     
     # Generic relation to the object.
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.TextField()
     object = GenericForeignKey('content_type', 'object_id')
     
@@ -233,7 +233,7 @@ class WebSearch(models.Model):
     A search made with a search engine. Modeled after Google's search history,
     but (may/could/will) work with other sources.
     """
-    engine = models.ForeignKey(SearchEngine, related_name="searches")
+    engine = models.ForeignKey(SearchEngine, related_name="searches", on_delete=models.CASCADE)
     query = models.CharField(max_length=250)
     
     class Meta:
@@ -250,7 +250,7 @@ class WebSearchResult(models.Model):
     """
     A page viewed as a result of a WebSearch
     """
-    search = models.ForeignKey(WebSearch, related_name="results")
+    search = models.ForeignKey(WebSearch, related_name="results", on_delete=models.CASCADE)
     title  = models.CharField(max_length=250)
     url    = models.URLField()
 
@@ -272,7 +272,7 @@ class VideoSource(models.Model):
 class Video(models.Model):
     """A video you viewed."""
     
-    source = models.ForeignKey(VideoSource, related_name="videos")
+    source = models.ForeignKey(VideoSource, related_name="videos", on_delete=models.CASCADE)
     title  = models.CharField(max_length=250)
     url    = models.URLField()
 
@@ -317,7 +317,7 @@ class CodeCommit(models.Model):
     """
     A code change you checked in.
     """
-    repository = models.ForeignKey(CodeRepository, related_name="commits")
+    repository = models.ForeignKey(CodeRepository, related_name="commits", on_delete=models.CASCADE)
     revision = models.CharField(max_length=200)
     message = models.TextField()
 
