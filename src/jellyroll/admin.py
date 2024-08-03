@@ -55,7 +55,7 @@ class CodeRepositoryAdmin(admin.ModelAdmin):
     form = CodeRepositoryForm
 
 class CodeCommitAdmin(admin.ModelAdmin):
-    list_display = ('__unicode__', 'repository')
+    list_display = ('__str__', 'repository')
     list_filter = ('repository',)
     search_fields = ('message',)
 
