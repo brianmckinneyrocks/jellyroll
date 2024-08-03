@@ -44,7 +44,7 @@ class Item(models.Model):
         ordering = ['-timestamp']
         unique_together = [("content_type", "object_id")]
     
-    def __unicode__(self):
+    def __str__(self):
         return "%s: %s" % (self.content_type.model_class().__name__, self.object_str)
         
     def __cmp__(self, other):
@@ -67,7 +67,7 @@ class Bookmark(models.Model):
     thumbnail     = models.ImageField(upload_to="img/jellyroll/bookmarks/%Y/%m", blank=True)
     thumbnail_url = models.URLField(blank=True, max_length=1000)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.url
 
 class Track(models.Model):
@@ -79,7 +79,7 @@ class Track(models.Model):
     track_mbid  = models.CharField("MusicBrainz Track ID", max_length=36, blank=True)
     artist_mbid = models.CharField("MusicBrainz Artist ID", max_length=36, blank=True)
     
-    def __unicode__(self):
+    def __str__(self):
         return "%s - %s" % (self.artist_name, self.track_name)
 
 CC_LICENSES = (
@@ -139,7 +139,7 @@ class Photo(models.Model):
         return ''
     farm = property(_get_farm)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
     
     def url(self):
@@ -225,7 +225,7 @@ class SearchEngine(models.Model):
     home = models.URLField()
     search_template = models.URLField()
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
         
 class WebSearch(models.Model):
@@ -239,7 +239,7 @@ class WebSearch(models.Model):
     class Meta:
         verbose_name_plural = "web searches"
 
-    def __unicode__(self):
+    def __str__(self):
         return self.query
         
     def url(self):
@@ -254,7 +254,7 @@ class WebSearchResult(models.Model):
     title  = models.CharField(max_length=250)
     url    = models.URLField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
 class VideoSource(models.Model):
@@ -266,7 +266,7 @@ class VideoSource(models.Model):
     home = models.URLField()
     embed_template = models.URLField()
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class Video(models.Model):
@@ -276,7 +276,7 @@ class Video(models.Model):
     title  = models.CharField(max_length=250)
     url    = models.URLField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
         
     def docid(self):
@@ -310,7 +310,7 @@ class CodeRepository(models.Model):
     class Meta:
         verbose_name_plural = "code repositories"
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class CodeCommit(models.Model):
@@ -324,7 +324,7 @@ class CodeCommit(models.Model):
     class Meta:
         ordering = ["-revision"]
 
-    def __unicode__(self):
+    def __str__(self):
         return "[%s] %s" % (self.format_revision(), text.truncate_words(self.message, 10))
 
     def format_revision(self):
@@ -349,7 +349,7 @@ class Message(models.Model):
     message = models.TextField()
     links = models.ManyToManyField('ContentLink',blank=True)
     
-    def __unicode__(self):
+    def __str__(self):
         return Truncator(self.message).words(30)
 
 class ContentLink(models.Model):
@@ -367,7 +367,7 @@ class ContentLink(models.Model):
     url = models.URLField()
     identifier = models.CharField(max_length=128)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.identifier
 
 class Location(models.Model):
@@ -378,7 +378,7 @@ class Location(models.Model):
     longitude = models.TextField()
     name = models.CharField(max_length=200, blank=True)
     
-    def __unicode__(self):
+    def __str__(self):
         if self.name:
             return self.name
         else:
